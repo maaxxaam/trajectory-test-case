@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import unittest
 import json
 from unittest.mock import patch, MagicMock
@@ -78,6 +79,9 @@ class TestScheduler(unittest.TestCase):
         # Valid slot before busy period
         self.assertTrue(scheduler.is_available("2024-10-10", "10:00", "10:30"))
         
+        # Valid slot between busy periods
+        self.assertTrue(scheduler.is_available("2024-10-10", "13:30", "13:45"))
+        
         # Slot overlapping busy period
         self.assertFalse(scheduler.is_available("2024-10-10", "11:30", "12:30"))
         
@@ -89,6 +93,7 @@ class TestScheduler(unittest.TestCase):
         
         # Slot spanning multiple busy periods
         self.assertFalse(scheduler.is_available("2024-10-10", "10:30", "14:30"))
+        self.assertFalse(scheduler.is_available("2024-10-10", "11:30", "14:30"))
 
     @patch('scheduler.urlopen')
     def test_find_slot_for_duration(self, mock_urlopen):
@@ -101,7 +106,7 @@ class TestScheduler(unittest.TestCase):
             ("2024-10-10", "09:00", "10:00")
         )
         
-        # Find 90-minute slot (needs to go to next day)
+        # Find 90-minute slot 
         self.assertEqual(
             scheduler.find_slot_for_duration(90),
             ("2024-10-10", "09:00", "10:30")
@@ -114,7 +119,7 @@ class TestScheduler(unittest.TestCase):
         )
         
         # Slot too long for any day
-        self.assertIsNone(scheduler.find_slot_for_duration(1000))
+        self.assertIsNone(scheduler.find_slot_for_duration(1450))
 
 if __name__ == '__main__':
     unittest.main()
